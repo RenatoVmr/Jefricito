@@ -14,7 +14,16 @@ namespace software.Models
         public required string Categoria { get; set; }
 
         [Required(ErrorMessage = "La cantidad es obligatoria")]
-        public required string Cantidad { get; set; }
+        public decimal CantidadNumerica { get; set; }
+
+        [Required(ErrorMessage = "La unidad de medida es obligatoria")]
+        public required string UnidadMedida { get; set; }
+
+        public string Cantidad => $"{CantidadNumerica} {UnidadMedida}";
+
+        [Required(ErrorMessage = "El precio unitario es obligatorio")]
+        [DataType(DataType.Currency)]
+        public decimal PrecioUnitario { get; set; }
 
         [Required(ErrorMessage = "La ubicación es obligatoria")]
         public required string Ubicacion { get; set; }
@@ -27,7 +36,7 @@ namespace software.Models
 
         [Required]
         [DataType(DataType.Currency)]
-        public decimal ValorTotal { get; set; }
+        public decimal ValorTotal => CantidadNumerica * PrecioUnitario;
 
         public string Estado => DeterminarEstado();
 

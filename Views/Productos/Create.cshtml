@@ -1,0 +1,135 @@
+@model software.Models.Producto
+
+@{
+    ViewData["Title"] = "Nuevo Producto";
+}
+
+<div class="container-fluid productos-bg p-4">
+    <div class="d-flex align-items-center mb-4">
+        <a asp-action="Index" class="btn btn-light border me-3"><span aria-hidden="true">&larr;</span> Volver</a>
+        <div>
+            <h3 class="mb-0">Nuevo Producto</h3>
+            <div class="text-muted small">Completa la información del nuevo producto</div>
+        </div>
+    </div>
+    <div class="card shadow-sm rounded-4">
+        <div class="card-body">
+            <h6 class="fw-bold mb-4">Información del Producto</h6>
+            <form asp-action="Create" autocomplete="off">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="Codigo" class="form-label">Código del Producto *</label>
+                        <input asp-for="Codigo" class="form-control form-control-lg bg-light" placeholder="Ej: PROD001" />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Nombre" class="form-label">Nombre del Producto *</label>
+                        <input asp-for="Nombre" class="form-control form-control-lg bg-light" placeholder="Ej: Leche Entera" />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Categoria" class="form-label">Categoría *</label>
+                        <input asp-for="Categoria" class="form-control form-control-lg bg-light" placeholder="Ej: Lácteos" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Lote *</label>
+                        <input class="form-control form-control-lg bg-light" placeholder="Ej: LT2025-001" />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="CantidadNumerica" class="form-label">Cantidad *</label>
+                        <input asp-for="CantidadNumerica" class="form-control form-control-lg bg-light" placeholder="0" type="number" step="0.01" />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="UnidadMedida" class="form-label">Unidad de Medida *</label>
+                        <select asp-for="UnidadMedida" class="form-select form-select-lg bg-light">
+                            <option value="">Seleccione una unidad</option>
+                            <option value="Unidades">Unidades</option>
+                            <option value="Kg">Kilogramos</option>
+                            <option value="Litros">Litros</option>
+                            <option value="Botellas">Botellas</option>
+                            <option value="Cajas">Cajas</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="PrecioUnitario" class="form-label">Precio Unitario ($) *</label>
+                        <input asp-for="PrecioUnitario" class="form-control form-control-lg bg-light" placeholder="0" type="number" step="0.01" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Stock Mínimo *</label>
+                        <input class="form-control form-control-lg bg-light" placeholder="0" />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Vencimiento" class="form-label">Fecha de Vencimiento *</label>
+                        <input asp-for="Vencimiento" class="form-control form-control-lg bg-light" placeholder="dd/mm/aaaa" type="date" />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Ubicacion" class="form-label">Ubicación en Almacén *</label>
+                        <input asp-for="Ubicacion" class="form-control form-control-lg bg-light" placeholder="Ej: Almacén A - Estante 1" />
+                    </div>
+                </div>
+                <div class="mt-4 p-3 bg-light rounded-3">
+                    <div class="fw-semibold mb-1">Resumen</div>
+                    <div class="text-secondary">Valor Total: <span id="valorTotal">$0.00</span></div>
+                </div>
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                    <a asp-action="Index" class="btn btn-outline-secondary px-4">Cancelar</a>
+                    <button type="submit" class="btn btn-dark px-4">Guardar Producto</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .productos-bg {
+        background: #f6f8fa;
+        min-height: 100vh;
+    }
+    .card {
+        border-radius: 1.2rem;
+        border: none;
+    }
+    .form-label {
+        font-weight: 500;
+        color: #22223b;
+    }
+    .form-control-lg {
+        border-radius: 0.7rem;
+        font-size: 1rem;
+        padding: 0.7rem 1rem;
+    }
+    .btn-dark {
+        background: #22223b;
+        border: none;
+    }
+    .btn-dark:hover {
+        background: #393a5a;
+    }
+    .btn-outline-secondary {
+        border-radius: 0.7rem;
+    }
+    .btn {
+        border-radius: 0.7rem;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        const cantidadInput = document.querySelector('[name="CantidadNumerica"]');
+        const precioInput = document.querySelector('[name="PrecioUnitario"]');
+        const valorTotalSpan = document.getElementById('valorTotal');
+        
+        function updateValorTotal() {
+            const cantidad = parseFloat(cantidadInput.value) || 0;
+            const precio = parseFloat(precioInput.value) || 0;
+            const total = cantidad * precio;
+            valorTotalSpan.textContent = `$${total.toFixed(2)}`;
+        }
+
+        if (cantidadInput && precioInput) {
+            cantidadInput.addEventListener('input', updateValorTotal);
+            precioInput.addEventListener('input', updateValorTotal);
+            
+            // Actualizar el total inicial
+            updateValorTotal();
+        }
+    </script>
+}

@@ -1,8 +1,15 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using software.Models;
+using iText.Kernel.Pdf;
+using iText.Layout;
+using iText.Layout.Element;
+using iText.Layout.Properties;
+using System.IO;
 
 namespace software.Controllers
 {
+    [Authorize]
     public class ProductosController : Controller
     {
         private static readonly List<Producto> _productos = new()
@@ -12,66 +19,72 @@ namespace software.Controllers
                 Codigo = "PROD001",
                 Nombre = "Leche Entera",
                 Categoria = "Lácteos",
-                Cantidad = "45 Litros",
+                CantidadNumerica = 45,
+                UnidadMedida = "Litros",
+                PrecioUnitario = 2.50M,
                 Ubicacion = "Almacén A - Estante 1",
                 Vencimiento = DateTime.Parse("2025-11-07"),
-                EstadoStock = "Disponible",
-                ValorTotal = 112.50M
+                EstadoStock = "Disponible"
             },
             new Producto
             {
                 Codigo = "PROD002",
                 Nombre = "Yogurt Natural",
                 Categoria = "Lácteos",
-                Cantidad = "15 Unidades",
+                CantidadNumerica = 15,
+                UnidadMedida = "Unidades",
+                PrecioUnitario = 1.80M,
                 Ubicacion = "Almacén A - Estante 2",
                 Vencimiento = DateTime.Parse("2025-11-04"),
-                EstadoStock = "Bajo Stock",
-                ValorTotal = 27.00M
+                EstadoStock = "Bajo Stock"
             },
             new Producto
             {
                 Codigo = "PROD003",
                 Nombre = "Pan Integral",
                 Categoria = "Panadería",
-                Cantidad = "80 Unidades",
+                CantidadNumerica = 80,
+                UnidadMedida = "Unidades",
+                PrecioUnitario = 1.20M,
                 Ubicacion = "Almacén B - Estante 1",
                 Vencimiento = DateTime.Parse("2025-12-02"),
-                EstadoStock = "Disponible",
-                ValorTotal = 96.00M
+                EstadoStock = "Disponible"
             },
             new Producto
             {
                 Codigo = "PROD004",
                 Nombre = "Aceite de Oliva",
                 Categoria = "Aceites",
-                Cantidad = "25 Botellas",
+                CantidadNumerica = 25,
+                UnidadMedida = "Botellas",
+                PrecioUnitario = 8.50M,
                 Ubicacion = "Almacén C - Estante 3",
                 Vencimiento = DateTime.Parse("2026-05-01"),
-                EstadoStock = "Disponible",
-                ValorTotal = 212.50M
+                EstadoStock = "Disponible"
             },
             new Producto
             {
                 Codigo = "PROD005",
                 Nombre = "Arroz Blanco",
                 Categoria = "Granos",
-                Cantidad = "120 Kg",
+                CantidadNumerica = 120,
+                UnidadMedida = "Kg",
+                PrecioUnitario = 1.50M,
                 Ubicacion = "Almacén C - Estante 1",
                 Vencimiento = DateTime.Parse("2026-11-02"),
-                EstadoStock = "Disponible",
-                ValorTotal = 180.00M
+                EstadoStock = "Disponible"
             },
             new Producto
             {
                 Codigo = "PROD006",
                 Nombre = "Queso Fresco",
                 Categoria = "Lácteos",
-                Cantidad = "8 Kg",
+                CantidadNumerica = 8,
+                UnidadMedida = "Kg",
+                PrecioUnitario = 12.00M,
                 Ubicacion = "Almacén A - Refrigerador 1",
                 Vencimiento = DateTime.Parse("2025-11-01"),
-                EstadoStock = "Bajo Stock",
-                ValorTotal = 96.00M
+                EstadoStock = "Bajo Stock"
             }
         };
 
@@ -136,6 +149,51 @@ namespace software.Controllers
                 _productos.Remove(producto);
             }
             return RedirectToAction(nameof(Index));
+        }
+
+        public IActionResult ExportarPDF()
+        {
+            using (MemoryStream ms = new MemoryStream())
+            {
+                var writerProperties = new WriterProperties().SetPdfVersion(PdfVersion.PDF_2_0);
+                var writer = new PdfWriter(ms, writerProperties);
+                var pdf = new PdfDocument(writer);
+                var document = new Document(pdf);
+
+                document.Add(new Paragraph("Listado de Productos")
+                    .SetTextAlignment(TextAlignment.CENTER)
+                    .SetFontSize(20));
+
+                Table table = new Table(8).UseAllAvailableWidth();
+
+                // Encabezados
+                table.AddHeaderCell("Código");
+                table.AddHeaderCell("Nombre");
+                table.AddHeaderCell("Categoría");
+                table.AddHeaderCell("Cantidad");
+                table.AddHeaderCell("Precio Unit.");
+                table.AddHeaderCell("Ubicación");
+                table.AddHeaderCell("Vencimiento");
+                table.AddHeaderCell("Valor Total");
+
+                // Agregar datos
+                foreach (var producto in _productos)
+                {
+                    table.AddCell(producto.Codigo);
+                    table.AddCell(producto.Nombre);
+                    table.AddCell(producto.Categoria);
+                    table.AddCell(producto.Cantidad);
+                    table.AddCell($"${producto.PrecioUnitario:N2}");
+                    table.AddCell(producto.Ubicacion);
+                    table.AddCell(producto.Vencimiento.ToString("dd/MM/yyyy"));
+                    table.AddCell($"${producto.ValorTotal:N2}");
+                }
+
+                document.Add(table);
+                document.Close();
+
+                return File(ms.ToArray(), "application/pdf", "Productos.pdf");
+            }
         }
     }
 }

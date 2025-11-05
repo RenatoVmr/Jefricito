@@ -1,8 +1,10 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using software.Models;
 
 namespace software.Controllers
 {
+    [Authorize]
     public class DashboardController : Controller
     {
         public IActionResult Index()

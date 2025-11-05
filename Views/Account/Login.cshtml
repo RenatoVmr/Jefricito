@@ -1,0 +1,100 @@
+@model software.Models.LoginViewModel
+
+@{
+    ViewData["Title"] = "Iniciar Sesión";
+    Layout = "_LayoutLogin";
+}
+
+<div class="login-container">
+    <div class="login-box">
+        <div class="text-center mb-4">
+            <h2 class="login-title">Sistema de Inventario</h2>
+            <p class="text-muted">Ingresa tus credenciales para continuar</p>
+        </div>
+
+        <form asp-controller="Account" asp-action="Login" method="post">
+            <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+            
+            @if (ViewBag.SuccessMessage != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
+                    @ViewBag.SuccessMessage
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            <div asp-validation-summary="ModelOnly" class="text-danger text-center mb-3"></div>
+
+            <div class="form-floating mb-3">
+                <input asp-for="Username" class="form-control" placeholder="Usuario" autocomplete="off" />
+                <label asp-for="Username"></label>
+                <span asp-validation-for="Username" class="text-danger"></span>
+            </div>
+
+            <div class="form-floating mb-3">
+                <input asp-for="Password" class="form-control" placeholder="Contraseña" />
+                <label asp-for="Password"></label>
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+
+            <div class="form-check mb-3">
+                <input asp-for="RememberMe" class="form-check-input" />
+                <label asp-for="RememberMe" class="form-check-label"></label>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 btn-lg mb-3">Iniciar Sesión</button>
+            
+            <div class="text-center">
+                <a asp-action="Register" class="text-decoration-none">¿No tienes una cuenta? Regístrate</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .login-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f6f8fa;
+    }
+
+    .login-box {
+        width: 100%;
+        max-width: 400px;
+        padding: 2rem;
+        background: white;
+        border-radius: 1rem;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
+    }
+
+    .login-title {
+        color: #22223b;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-floating > label {
+        color: #6c757d;
+    }
+
+    .form-control {
+        border-radius: 0.5rem;
+    }
+
+    .btn-primary {
+        background: #22223b;
+        border: none;
+        border-radius: 0.5rem;
+        padding: 0.8rem;
+    }
+
+    .btn-primary:hover {
+        background: #393a5a;
+    }
+</style>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

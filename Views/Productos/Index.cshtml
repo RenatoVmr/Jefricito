@@ -4,34 +4,33 @@
     ViewData["Title"] = "Gestión de Productos";
 }
 
-<div class="container-fluid">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Gestión de Productos</h1>
+
+<div class="container-fluid productos-bg p-4">
+    <div class="productos-header d-flex justify-content-between align-items-center mb-4">
+        <h1 class="productos-title">Gestión de Productos</h1>
         <div>
-            <button class="btn btn-secondary me-2">
+            <a asp-action="ExportarPDF" class="btn btn-outline-secondary me-2 shadow-sm">
                 <i class="bi bi-file-pdf"></i> Exportar a PDF
-            </button>
-            <a asp-action="Create" class="btn btn-primary">
+            </a>
+            <a asp-action="Create" class="btn btn-primary shadow-sm">
                 <i class="bi bi-plus-lg"></i> Agregar Producto
             </a>
         </div>
     </div>
 
-    <div class="card">
+    <div class="card productos-card shadow-lg">
         <div class="card-body">
-            <h6 class="card-subtitle mb-3">Administra tu inventario completo</h6>
+            <h6 class="card-subtitle mb-4 text-muted">Administra tu inventario completo</h6>
 
             <div class="row mb-4">
-                <div class="col-md-6">
-                    <div class="input-group">
-                        <span class="input-group-text">
-                            <i class="bi bi-search"></i>
-                        </span>
-                        <input type="text" id="searchInput" class="form-control" placeholder="Buscar por nombre, código o lote...">
+                <div class="col-md-6 mb-2 mb-md-0">
+                    <div class="input-group shadow-sm">
+                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
+                        <input type="text" id="searchInput" class="form-control border-start-0" placeholder="Buscar por nombre, código o lote...">
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <select class="form-select" id="categoryFilter">
+                    <select class="form-select shadow-sm" id="categoryFilter">
                         <option value="">Todas las categorías</option>
                         <option value="Lácteos">Lácteos</option>
                         <option value="Panadería">Panadería</option>
@@ -41,14 +40,15 @@
                 </div>
             </div>
 
-            <div class="table-responsive">
-                <table class="table">
-                    <thead>
+            <div class="table-responsive rounded shadow-sm">
+                <table class="table table-hover align-middle productos-table">
+                    <thead class="table-light">
                         <tr>
                             <th>Código</th>
                             <th>Nombre</th>
                             <th>Categoría</th>
                             <th>Cantidad</th>
+                            <th>Precio Unit.</th>
                             <th>Ubicación</th>
                             <th>Vencimiento</th>
                             <th>Estado Stock</th>
@@ -64,11 +64,11 @@
                                 <td>@item.Nombre</td>
                                 <td>@item.Categoria</td>
                                 <td>@item.Cantidad</td>
+                                <td>$@item.PrecioUnitario.ToString("N2")</td>
                                 <td>@item.Ubicacion</td>
                                 <td>
                                     @item.Vencimiento.ToString("yyyy-MM-dd")
-                                    <span class="badge bg-@(item.Estado == "Vigente" ? "success" : 
-                                                         item.Estado == "Próximo a vencer" ? "warning" : "danger")">
+                                    <span class="badge bg-@(item.Estado == "Vigente" ? "success" : item.Estado == "Próximo a vencer" ? "warning" : "danger") ms-2">
                                         @item.Estado
                                     </span>
                                 </td>
@@ -79,14 +79,12 @@
                                 </td>
                                 <td>$@item.ValorTotal.ToString("N2")</td>
                                 <td>
-                                    <div class="btn-group">
+                                    <div class="action-pill-group">
                                         <a asp-action="Edit" asp-route-id="@item.Codigo" 
-                                           class="btn btn-sm btn-outline-primary">
-                                            <i class="bi bi-pencil"></i>
+                                           class="action-pill action-pill-edit" title="Editar">
                                         </a>
-                                        <button type="button" class="btn btn-sm btn-outline-danger" 
-                                                onclick="deleteProduct('@item.Codigo')">
-                                            <i class="bi bi-trash"></i>
+                                        <button type="button" class="action-pill action-pill-delete" 
+                                                onclick="deleteProduct('@item.Codigo')" title="Eliminar">
                                         </button>
                                     </div>
                                 </td>
@@ -96,19 +94,99 @@
                 </table>
             </div>
 
-            <div class="d-flex justify-content-between align-items-center mt-3">
-                <div>
-                    Total de productos: @Model.Count()
+            <div class="d-flex justify-content-between align-items-center mt-4">
+                <div class="fw-semibold text-secondary">
+                    Total de productos: <span class="text-dark">@Model.Count()</span>
                 </div>
-                <div>
-                    Valor total: $@Model.Sum(p => p.ValorTotal).ToString("N2")
+                <div class="fw-semibold text-secondary">
+                    Valor total: <span class="text-dark">$@Model.Sum(p => p.ValorTotal).ToString("N2")</span>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-@section Scripts {
+        <style>
+            .productos-bg {
+                background: #f6f8fa;
+                min-height: 100vh;
+            }
+            .productos-header {
+                border-radius: 1rem;
+                background: #fff;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+                padding: 1.5rem 2rem 1.5rem 2rem;
+                margin-bottom: 2rem;
+            }
+            .productos-title {
+                font-weight: 700;
+                color: #22223b;
+                letter-spacing: 0.5px;
+            }
+            .productos-card {
+                border-radius: 1.2rem;
+                border: none;
+            }
+            .productos-table {
+                border-radius: 0.7rem;
+                overflow: hidden;
+                background: #fff;
+            }
+            .productos-table th, .productos-table td {
+                vertical-align: middle;
+            }
+            .productos-table thead th {
+                font-weight: 600;
+                background: #f1f3f6;
+                border-bottom: 2px solid #e0e0e0;
+            }
+            .productos-table tbody tr {
+                transition: background 0.15s;
+            }
+            .productos-table tbody tr:hover {
+                background: #f5faff;
+            }
+            .action-pill-group {
+                display: flex;
+                gap: 0.3rem;
+                justify-content: center;
+            }
+            .action-pill {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 999px;
+                border: 1.5px solid #007bff;
+                background: #fff;
+                color: #007bff;
+                width: 36px;
+                height: 28px;
+                font-size: 1.1rem;
+                transition: background 0.2s, color 0.2s, border 0.2s;
+                padding: 0;
+                margin: 0;
+                cursor: pointer;
+                box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+            }
+            .action-pill-edit {
+                border-color: #007bff;
+                color: #007bff;
+            }
+            .action-pill-edit:hover {
+                background: #007bff;
+                color: #fff;
+            }
+            .action-pill-delete {
+                border-color: #dc3545;
+                color: #dc3545;
+            }
+            .action-pill-delete:hover {
+                background: #dc3545;
+                color: #fff;
+            }
+        </style>
+
+        @section Scripts {
     <script>
         function deleteProduct(id) {
             if (confirm('¿Está seguro que desea eliminar este producto?')) {
