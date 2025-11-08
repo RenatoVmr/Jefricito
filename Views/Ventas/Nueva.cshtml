@@ -22,7 +22,7 @@
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label asp-for="Codigo" class="form-label"></label>
-                                <input asp-for="Codigo" class="form-control" />
+                                <input asp-for="Codigo" class="form-control" id="codigoProducto" />
                                 <span asp-validation-for="Codigo" class="text-danger"></span>
                             </div>
                             <div class="col-md-6">
@@ -35,12 +35,12 @@
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label asp-for="Producto" class="form-label"></label>
-                                <input asp-for="Producto" class="form-control" />
+                                <input asp-for="Producto" class="form-control" readonly />
                                 <span asp-validation-for="Producto" class="text-danger"></span>
                             </div>
                             <div class="col-md-6">
                                 <label asp-for="Categoria" class="form-label"></label>
-                                <input asp-for="Categoria" class="form-control" />
+                                <input asp-for="Categoria" class="form-control" readonly />
                                 <span asp-validation-for="Categoria" class="text-danger"></span>
                             </div>
                         </div>
@@ -53,7 +53,7 @@
                             </div>
                             <div class="col-md-6">
                                 <label asp-for="PrecioUnitario" class="form-label"></label>
-                                <input asp-for="PrecioUnitario" class="form-control" type="number" step="0.01" min="0" />
+                                <input asp-for="PrecioUnitario" class="form-control" type="number" step="0.01" min="0" readonly />
                                 <span asp-validation-for="PrecioUnitario" class="text-danger"></span>
                             </div>
                         </div>
@@ -105,8 +105,42 @@
             $('#total').text(`$${total.toFixed(2)}`);
         }
 
+        function buscarProducto(codigo) {
+            if (!codigo) {
+                $('#Producto').val('');
+                $('#Categoria').val('');
+                $('#PrecioUnitario').val('');
+                calcularTotal();
+                return;
+            }
+
+            $.get(`/Ventas/BuscarProducto?codigo=${codigo}`)
+                .done(function(data) {
+                    $('#Producto').val(data.producto);
+                    $('#Categoria').val(data.categoria);
+                    $('#PrecioUnitario').val(data.precioUnitario);
+                    calcularTotal();
+                })
+                .fail(function() {
+                    $('#Producto').val('');
+                    $('#Categoria').val('');
+                    $('#PrecioUnitario').val('');
+                    calcularTotal();
+                });
+        }
+
         $(document).ready(function () {
-            $('#Cantidad, #PrecioUnitario').on('input', calcularTotal);
+            $('#Cantidad').on('input', calcularTotal);
+            
+            var typingTimer;
+            $('#codigoProducto').on('input', function() {
+                clearTimeout(typingTimer);
+                const codigo = $(this).val();
+                
+                typingTimer = setTimeout(function() {
+                    buscarProducto(codigo);
+                }, 500);
+            });
         });
     </script>
 }

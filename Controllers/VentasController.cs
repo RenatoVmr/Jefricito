@@ -8,6 +8,28 @@ namespace software.Controllers
     public class VentasController : Controller
     {
         private static readonly List<Venta> _ventas = new();
+        private readonly List<Producto> _productos;
+
+        public VentasController()
+        {
+            // Obtenemos la lista de productos del controlador de productos
+            _productos = ProductosController.ObtenerProductos();
+        }
+
+        [HttpGet]
+        public IActionResult BuscarProducto(string codigo)
+        {
+            var producto = _productos.FirstOrDefault(p => p.Codigo == codigo);
+            if (producto == null)
+                return NotFound();
+
+            return Json(new
+            {
+                producto = producto.Nombre,
+                categoria = producto.Categoria,
+                precioUnitario = producto.PrecioUnitario
+            });
+        }
 
         public IActionResult Index()
         {

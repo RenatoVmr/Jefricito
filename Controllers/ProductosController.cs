@@ -12,7 +12,7 @@ namespace software.Controllers
     [Authorize]
     public class ProductosController : Controller
     {
-        private static readonly List<Producto> _productos = new()
+        public static List<Producto> _productos = new()
         {
             new Producto
             {
@@ -149,6 +149,11 @@ namespace software.Controllers
                 _productos.Remove(producto);
             }
             return RedirectToAction(nameof(Index));
+        }
+
+        public static List<Producto> ObtenerProductos()
+        {
+            return _productos;
         }
 
         public IActionResult ExportarPDF()
