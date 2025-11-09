@@ -54,8 +54,8 @@
                 @if (User.IsInRole("Admin"))
                 {
                     <div class="nav-item">
-                        <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Account" && ViewContext.RouteData.Values["Action"]?.ToString() == "Usuarios" ? "active" : "")"
-                           asp-controller="Account" asp-action="Usuarios">
+                        <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Usuarios" ? "active" : "")"
+                           asp-controller="Usuarios" asp-action="Index">
                             <i class="bi bi-people"></i>
                             <span>Usuarios</span>
                         </a>
