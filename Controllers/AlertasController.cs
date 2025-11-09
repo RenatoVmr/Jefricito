@@ -12,34 +12,77 @@ namespace software.Controllers
 
         public AlertasController()
         {
-            // Obtener productos del controlador de productos
-            _productos = ProductosController.ObtenerProductos();
+            // Datos de ejemplo
+            _productos = new List<Producto>
+            {
+                new Producto
+                {
+                    Codigo = "PROD001",
+                    Nombre = "Leche Entera",
+                    Categoria = "Lácteos",
+                    CantidadNumerica = 45,
+                    UnidadMedida = "Litros",
+                    PrecioUnitario = 12.00M,
+                    Ubicacion = "Almacén A - Estante 1",
+                    Vencimiento = DateTime.Now.AddDays(-2),
+                    StockMinimo = 50
+                },
+                new Producto
+                {
+                    Codigo = "PROD002",
+                    Nombre = "Yogurt Natural",
+                    Categoria = "Lácteos",
+                    CantidadNumerica = 3,
+                    UnidadMedida = "Unidades",
+                    PrecioUnitario = 5.00M,
+                    Ubicacion = "Almacén A - Estante 2",
+                    Vencimiento = DateTime.Now.AddDays(-4),
+                    StockMinimo = 30
+                },
+                new Producto
+                {
+                    Codigo = "PROD003",
+                    Nombre = "Pan Integral",
+                    Categoria = "Panadería",
+                    CantidadNumerica = 80,
+                    UnidadMedida = "Unidades",
+                    PrecioUnitario = 3.50M,
+                    Ubicacion = "Almacén B - Estante 1",
+                    Vencimiento = DateTime.Now.AddDays(24),
+                    StockMinimo = 100
+                },
+                new Producto
+                {
+                    Codigo = "PROD006",
+                    Nombre = "Queso Fresco",
+                    Categoria = "Lácteos",
+                    CantidadNumerica = 8,
+                    UnidadMedida = "Kg",
+                    PrecioUnitario = 12.00M,
+                    Ubicacion = "Almacén A - Refrigerador 1",
+                    Vencimiento = DateTime.Now.AddDays(-7),
+                    StockMinimo = 10
+                }
+            };
+        }
+
+        public IActionResult Detalles(string id)
+        {
+            var producto = _productos.FirstOrDefault(p => p.Codigo == id);
+            if (producto == null)
+            {
+                return NotFound();
+            }
+
+            return View(producto);
         }
 
         public IActionResult Index()
         {
-            var hoy = DateTime.Now;
-            
-            // Obtener productos vencidos
-            var productosVencidos = _productos
-                .Where(p => p.Vencimiento < hoy)
-                .ToList();
-
-            // Obtener productos próximos a vencer (30 días)
-            var productosProximosVencer = _productos
-                .Where(p => p.Vencimiento >= hoy && p.Vencimiento <= hoy.AddDays(30))
-                .OrderBy(p => p.Vencimiento)
-                .ToList();
-
-            // Obtener productos con stock bajo
-            var productosBajoStock = _productos
-                .Where(p => p.CantidadNumerica <= p.StockMinimo)
-                .OrderBy(p => p.CantidadNumerica)
-                .ToList();
-
-            ViewBag.TotalVencidos = productosVencidos.Count;
-            ViewBag.TotalProximosVencer = productosProximosVencer.Count;
-            ViewBag.TotalBajoStock = productosBajoStock.Count;
+            // Filtrar productos según su estado
+            var productosVencidos = _productos.Where(p => p.Vencimiento < DateTime.Now).ToList();
+            var productosProximosVencer = _productos.Where(p => p.Vencimiento >= DateTime.Now && p.Vencimiento <= DateTime.Now.AddDays(30)).ToList();
+            var productosBajoStock = _productos.Where(p => p.CantidadNumerica < p.StockMinimo).ToList();
 
             ViewBag.ProductosVencidos = productosVencidos;
             ViewBag.ProductosProximosVencer = productosProximosVencer;
