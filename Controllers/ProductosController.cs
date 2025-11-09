@@ -93,23 +93,27 @@ namespace software.Controllers
             return View(_productos);
         }
 
+        [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
             return View();
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public IActionResult Create(Producto producto)
         {
             if (ModelState.IsValid)
             {
                 producto.Codigo = $"PROD{(_productos.Count + 1):000}";
                 _productos.Add(producto);
+                TempData["SuccessMessage"] = "Producto agregado exitosamente.";
                 return RedirectToAction(nameof(Index));
             }
             return View(producto);
         }
 
+        [Authorize(Roles = "Admin")]
         public IActionResult Edit(string id)
         {
             var producto = _productos.FirstOrDefault(p => p.Codigo == id);
@@ -121,6 +125,7 @@ namespace software.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public IActionResult Edit(string id, Producto producto)
         {
             if (id != producto.Codigo)
@@ -134,6 +139,7 @@ namespace software.Controllers
                 if (index != -1)
                 {
                     _productos[index] = producto;
+                    TempData["SuccessMessage"] = "Producto actualizado exitosamente.";
                 }
                 return RedirectToAction(nameof(Index));
             }
@@ -141,12 +147,14 @@ namespace software.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public IActionResult Delete(string id)
         {
             var producto = _productos.FirstOrDefault(p => p.Codigo == id);
             if (producto != null)
             {
                 _productos.Remove(producto);
+                TempData["SuccessMessage"] = "Producto eliminado exitosamente.";
             }
             return RedirectToAction(nameof(Index));
         }
@@ -188,10 +196,10 @@ namespace software.Controllers
                     table.AddCell(producto.Nombre);
                     table.AddCell(producto.Categoria);
                     table.AddCell(producto.Cantidad);
-                    table.AddCell($"${producto.PrecioUnitario:N2}");
+                    table.AddCell($"S/{producto.PrecioUnitario:N2}");
                     table.AddCell(producto.Ubicacion);
                     table.AddCell(producto.Vencimiento.ToString("dd/MM/yyyy"));
-                    table.AddCell($"${producto.ValorTotal:N2}");
+                    table.AddCell($"S/{producto.ValorTotal:N2}");
                 }
 
                 document.Add(table);

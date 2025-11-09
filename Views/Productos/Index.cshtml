@@ -12,11 +12,22 @@
             <a asp-action="ExportarPDF" class="btn btn-outline-secondary me-2 shadow-sm">
                 <i class="bi bi-file-pdf"></i> Exportar a PDF
             </a>
-            <a asp-action="Create" class="btn btn-primary shadow-sm">
-                <i class="bi bi-plus-lg"></i> Agregar Producto
-            </a>
+            @if (User.IsInRole("Admin"))
+            {
+                <a asp-action="Create" class="btn btn-primary shadow-sm">
+                    <i class="bi bi-plus-lg"></i> Agregar Producto
+                </a>
+            }
         </div>
     </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
 
     <div class="card productos-card shadow-lg">
         <div class="card-body">
@@ -53,7 +64,10 @@
                             <th>Vencimiento</th>
                             <th>Estado Stock</th>
                             <th>Valor Total</th>
-                            <th>Acciones</th>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <th>Acciones</th>
+                            }
                         </tr>
                     </thead>
                     <tbody>
@@ -64,7 +78,7 @@
                                 <td>@item.Nombre</td>
                                 <td>@item.Categoria</td>
                                 <td>@item.Cantidad</td>
-                                <td>$@item.PrecioUnitario.ToString("N2")</td>
+                                <td>S/@item.PrecioUnitario.ToString("N2")</td>
                                 <td>@item.Ubicacion</td>
                                 <td>
                                     @item.Vencimiento.ToString("yyyy-MM-dd")
@@ -77,17 +91,20 @@
                                         @item.EstadoStock
                                     </span>
                                 </td>
-                                <td>$@item.ValorTotal.ToString("N2")</td>
-                                <td>
-                                    <div class="action-pill-group">
-                                        <a asp-action="Edit" asp-route-id="@item.Codigo" 
-                                           class="action-pill action-pill-edit" title="Editar">
-                                        </a>
-                                        <button type="button" class="action-pill action-pill-delete" 
-                                                onclick="deleteProduct('@item.Codigo')" title="Eliminar">
-                                        </button>
-                                    </div>
-                                </td>
+                                <td>S/@item.ValorTotal.ToString("N2")</td>
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <td>
+                                        <div class="action-pill-group">
+                                            <a asp-action="Edit" asp-route-id="@item.Codigo" 
+                                               class="action-pill action-pill-edit" title="Editar">
+                                            </a>
+                                            <button type="button" class="action-pill action-pill-delete" 
+                                                    onclick="deleteProduct('@item.Codigo')" title="Eliminar">
+                                            </button>
+                                        </div>
+                                    </td>
+                                }
                             </tr>
                         }
                     </tbody>
@@ -99,7 +116,7 @@
                     Total de productos: <span class="text-dark">@Model.Count()</span>
                 </div>
                 <div class="fw-semibold text-secondary">
-                    Valor total: <span class="text-dark">$@Model.Sum(p => p.ValorTotal).ToString("N2")</span>
+                    Valor total: <span class="text-dark">S/@Model.Sum(p => p.ValorTotal).ToString("N2")</span>
                 </div>
             </div>
         </div>
