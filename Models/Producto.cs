@@ -38,6 +38,9 @@ namespace software.Models
         [DataType(DataType.Currency)]
         public decimal ValorTotal => CantidadNumerica * PrecioUnitario;
 
+        [Required]
+        public decimal StockMinimo { get; set; } = 10;
+
         public string Estado => DeterminarEstado();
 
         private string DeterminarEstado()

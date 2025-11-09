@@ -1,0 +1,260 @@
+@{
+    ViewData["Title"] = "Alertas de Inventario";
+    var productosVencidos = (List<Producto>)ViewBag.ProductosVencidos;
+    var productosProximosVencer = (List<Producto>)ViewBag.ProductosProximosVencer;
+    var productosBajoStock = (List<Producto>)ViewBag.ProductosBajoStock;
+}
+
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mt-4">Alertas de Inventario</h2>
+            <p class="text-muted">Monitoreo de vencimientos y stock crítico</p>
+        </div>
+        <a href="#" class="btn btn-outline-primary" onclick="exportarPDF()">
+            <i class="bi bi-file-pdf me-2"></i>Exportar a PDF
+        </a>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-danger bg-opacity-10 border-danger border-opacity-25">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <h6 class="text-danger mb-0">
+                            <i class="fas fa-exclamation-circle me-2"></i>Productos Vencidos
+                        </h6>
+                        <span class="badge bg-danger">1</span>
+                    </div>
+                    <p class="small text-muted mb-0">Requieren acción inmediata</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-warning bg-opacity-10 border-warning border-opacity-25">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <h6 class="text-warning mb-0">
+                            <i class="fas fa-clock me-2"></i>Próximos a Vencer
+                        </h6>
+                        <span class="badge bg-warning text-dark">3</span>
+                    </div>
+                    <p class="small text-muted mb-0">Próximos 30 días</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-info bg-opacity-10 border-info border-opacity-25">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <h6 class="text-info mb-0">
+                            <i class="fas fa-box me-2"></i>Bajo Stock
+                        </h6>
+                        <span class="badge bg-info">2</span>
+                    </div>
+                    <p class="small text-muted mb-0">Por debajo del mínimo</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Productos Vencidos -->
+    <div class="card mb-4">
+        <div class="card-header bg-danger bg-opacity-10">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-exclamation-circle text-danger me-2"></i>
+                <h5 class="mb-0">Productos Vencidos - Acción Inmediata Requerida</h5>
+            </div>
+            <p class="text-danger small mt-2 mb-0">
+                <i class="fas fa-info-circle me-1"></i>
+                Estos productos han superado su fecha de vencimiento y deben ser retirados del inventario inmediatamente.
+            </p>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Producto</th>
+                            <th>Lote</th>
+                            <th>Cantidad</th>
+                            <th>Fecha Vencimiento</th>
+                            <th>Días Vencido</th>
+                            <th>Ubicación</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var producto in productosVencidos)
+                        {
+                            var diasVencido = (DateTime.Now - producto.Vencimiento).Days;
+                            <tr>
+                                <td>@producto.Codigo</td>
+                                <td>@producto.Nombre</td>
+                                <td>LT@(producto.Vencimiento.ToString("yyyy-MM"))-@producto.Codigo.Substring(4)</td>
+                                <td>@producto.Cantidad</td>
+                                <td>@producto.Vencimiento.ToString("yyyy-MM-dd")</td>
+                                <td><span class="badge bg-danger">@diasVencido días</span></td>
+                                <td>@producto.Ubicacion</td>
+                                <td>
+                                    <a asp-controller="Productos" asp-action="Detalles" asp-route-id="@producto.Codigo" 
+                                       class="btn btn-sm btn-outline-secondary">
+                                        <i class="bi bi-eye"></i> Ver
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                        @if (!productosVencidos.Any())
+                        {
+                            <tr>
+                                <td colspan="8" class="text-center py-3">
+                                    <p class="text-muted mb-0">No hay productos vencidos</p>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Productos Próximos a Vencer -->
+    <div class="card mb-4">
+        <div class="card-header bg-warning bg-opacity-10">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-clock text-warning me-2"></i>
+                <h5 class="mb-0">Productos Próximos a Vencer</h5>
+            </div>
+            <p class="text-warning small mt-2 mb-0">
+                <i class="fas fa-info-circle me-1"></i>
+                Planifica la rotación de estos productos para evitar pérdidas.
+            </p>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Producto</th>
+                            <th>Lote</th>
+                            <th>Cantidad</th>
+                            <th>Fecha Vencimiento</th>
+                            <th>Días Restantes</th>
+                            <th>Prioridad</th>
+                            <th>Ubicación</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var producto in productosProximosVencer)
+                        {
+                            var diasRestantes = (producto.Vencimiento - DateTime.Now).Days;
+                            var prioridadClass = diasRestantes <= 7 ? "bg-danger" : 
+                                               diasRestantes <= 15 ? "bg-warning text-dark" : 
+                                               "bg-info";
+                            var prioridadText = diasRestantes <= 7 ? "Alta" : 
+                                              diasRestantes <= 15 ? "Media" : 
+                                              "Baja";
+                            <tr>
+                                <td>@producto.Codigo</td>
+                                <td>@producto.Nombre</td>
+                                <td>LT@(producto.Vencimiento.ToString("yyyy-MM"))-@producto.Codigo.Substring(4)</td>
+                                <td>@producto.Cantidad</td>
+                                <td>@producto.Vencimiento.ToString("yyyy-MM-dd")</td>
+                                <td><span class="badge bg-warning text-dark">@diasRestantes días</span></td>
+                                <td><span class="badge @prioridadClass">@prioridadText</span></td>
+                                <td>@producto.Ubicacion</td>
+                                <td>
+                                    <a asp-controller="Productos" asp-action="Detalles" asp-route-id="@producto.Codigo" 
+                                       class="btn btn-sm btn-outline-secondary">
+                                        <i class="bi bi-eye"></i> Ver
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                        @if (!productosProximosVencer.Any())
+                        {
+                            <tr>
+                                <td colspan="9" class="text-center py-3">
+                                    <p class="text-muted mb-0">No hay productos próximos a vencer</p>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Productos con Stock Bajo -->
+    <div class="card mb-4">
+        <div class="card-header bg-info bg-opacity-10">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-box text-info me-2"></i>
+                <h5 class="mb-0">Productos con Stock Bajo</h5>
+            </div>
+            <p class="text-info small mt-2 mb-0">
+                <i class="fas fa-info-circle me-1"></i>
+                Estos productos están por debajo del stock mínimo. Considera realizar un nuevo pedido.
+            </p>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Producto</th>
+                            <th>Categoría</th>
+                            <th>Stock Actual</th>
+                            <th>Stock Mínimo</th>
+                            <th>Déficit</th>
+                            <th>Ubicación</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var producto in productosBajoStock)
+                        {
+                            var deficit = producto.CantidadNumerica - producto.StockMinimo;
+                            <tr>
+                                <td>@producto.Codigo</td>
+                                <td>@producto.Nombre</td>
+                                <td>@producto.Categoria</td>
+                                <td>@producto.Cantidad</td>
+                                <td>@($"{producto.StockMinimo} {producto.UnidadMedida}")</td>
+                                <td><span class="badge bg-danger">@($"{deficit:F2} {producto.UnidadMedida}")</span></td>
+                                <td>@producto.Ubicacion</td>
+                                <td>
+                                    <a asp-controller="Productos" asp-action="Detalles" asp-route-id="@producto.Codigo" 
+                                       class="btn btn-sm btn-outline-secondary">
+                                        <i class="bi bi-eye"></i> Ver
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                        @if (!productosBajoStock.Any())
+                        {
+                            <tr>
+                                <td colspan="8" class="text-center py-3">
+                                    <p class="text-muted mb-0">No hay productos con stock bajo</p>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function exportarPDF() {
+            // Implementar la exportación a PDF
+            alert('Función de exportación a PDF en desarrollo');
+        }
+    </script>
+}

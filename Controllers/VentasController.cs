@@ -7,8 +7,26 @@ namespace software.Controllers
     [Authorize]
     public class VentasController : Controller
     {
-        private static readonly List<Venta> _ventas = new();
+        private static readonly List<Venta> _ventas = new List<Venta>();
+        private static readonly object _lock = new object();
         private readonly List<Producto> _productos;
+
+        static VentasController()
+        {
+            // Agregar una venta de prueba
+            _ventas.Add(new Venta
+            {
+                Id = Guid.NewGuid().ToString(),
+                Codigo = "PROD001",
+                Producto = "Leche Entera",
+                Categoria = "Lácteos",
+                Cantidad = 2,
+                PrecioUnitario = 2.50M,
+                Cliente = "Cliente Ejemplo",
+                VendidoPor = "Admin",
+                Fecha = DateTime.Now.AddMinutes(-5)
+            });
+        }
 
         public VentasController()
         {
@@ -34,7 +52,11 @@ namespace software.Controllers
         public IActionResult Index()
         {
             // Ordenar las ventas por fecha descendente (más recientes primero)
-            var ventasOrdenadas = _ventas.OrderByDescending(v => v.Fecha).ToList();
+            List<Venta> ventasOrdenadas;
+            lock (_lock)
+            {
+                ventasOrdenadas = _ventas.OrderByDescending(v => v.Fecha).ToList();
+            }
             
             var resumen = new ResumenVentas
             {
@@ -42,6 +64,13 @@ namespace software.Controllers
                 IngresosTotales = ventasOrdenadas.Sum(v => v.Total),
                 UnidadesVendidas = ventasOrdenadas.Sum(v => v.Cantidad)
             };
+
+            // Para depuración
+            System.Diagnostics.Debug.WriteLine($"Total de ventas en la lista: {ventasOrdenadas.Count}");
+            foreach (var venta in ventasOrdenadas)
+            {
+                System.Diagnostics.Debug.WriteLine($"Venta ID: {venta.Id}, Producto: {venta.Producto}, Cliente: {venta.Cliente}, Fecha: {venta.Fecha}");
+            }
 
             ViewBag.Resumen = resumen;
             return View(ventasOrdenadas);
@@ -56,15 +85,28 @@ namespace software.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Nueva(Venta venta)
         {
-            if (ModelState.IsValid)
+            try
             {
-                // Establecer la fecha actual
-                venta.Fecha = DateTime.Now;
-                
-                // Establecer el vendedor
-                venta.VendidoPor = User.Identity?.Name ?? "Sistema";
-                
-                // Validar que el producto existe
+                System.Diagnostics.Debug.WriteLine($"Recibiendo venta - Código: {venta.Codigo}, Producto: {venta.Producto}, Cliente: {venta.Cliente}, Cantidad: {venta.Cantidad}");
+
+                // Validar que todos los campos requeridos estén presentes
+                if (string.IsNullOrEmpty(venta.Codigo) || 
+                    string.IsNullOrEmpty(venta.Producto) || 
+                    string.IsNullOrEmpty(venta.Categoria) || 
+                    string.IsNullOrEmpty(venta.Cliente))
+                {
+                    ModelState.AddModelError(string.Empty, "Todos los campos son requeridos");
+                    return View(venta);
+                }
+
+                // Validar cantidad y precio
+                if (venta.Cantidad <= 0 || venta.PrecioUnitario <= 0)
+                {
+                    ModelState.AddModelError(string.Empty, "La cantidad y el precio deben ser mayores a 0");
+                    return View(venta);
+                }
+
+                // Validar que el producto existe y tiene stock suficiente
                 var producto = _productos.FirstOrDefault(p => p.Codigo == venta.Codigo);
                 if (producto == null)
                 {
@@ -72,12 +114,16 @@ namespace software.Controllers
                     return View(venta);
                 }
 
-                // Validar el stock
                 if (producto.CantidadNumerica < venta.Cantidad)
                 {
                     ModelState.AddModelError(string.Empty, "No hay suficiente stock disponible");
                     return View(venta);
                 }
+
+                // Establecer los datos de la venta
+                venta.Id = Guid.NewGuid().ToString();
+                venta.Fecha = DateTime.Now;
+                venta.VendidoPor = User.Identity?.Name ?? "Sistema";
 
                 // Actualizar el stock del producto
                 producto.CantidadNumerica -= venta.Cantidad;
@@ -86,14 +132,29 @@ namespace software.Controllers
                     producto.EstadoStock = "Bajo Stock";
                 }
 
-                // Agregar la venta
-                _ventas.Add(venta);
+                // Agregar la venta de forma thread-safe
+                lock (_lock)
+                {
+                    _ventas.Add(venta);
+                    System.Diagnostics.Debug.WriteLine($"Venta agregada exitosamente - ID: {venta.Id}");
+                    System.Diagnostics.Debug.WriteLine($"Total de ventas en la lista: {_ventas.Count}");
+                }
 
-                // Agregar mensaje de éxito
-                TempData["SuccessMessage"] = "Venta registrada exitosamente";
-                
+                // Configurar mensajes de éxito
+                TempData["SuccessMessage"] = $"Se registró la venta de {venta.Cantidad} unidades de {venta.Producto}";
+                TempData["LastVentaId"] = venta.Id;
+                TempData["VentaTotal"] = venta.Total.ToString("C2");
+
                 return RedirectToAction(nameof(Index));
             }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error al registrar la venta: {ex.Message}");
+                ModelState.AddModelError(string.Empty, "Ocurrió un error al registrar la venta. Por favor, inténtelo nuevamente.");
+                return View(venta);
+            }
+
+            // Si llegamos aquí, hay errores de validación
             return View(venta);
         }
 

@@ -115,3 +115,5 @@ C:\Users\ALONSO\Desktop\software\obj\Debug\net9.0\refint\software.dll
 C:\Users\ALONSO\Desktop\software\obj\Debug\net9.0\software.pdb
 C:\Users\ALONSO\Desktop\software\obj\Debug\net9.0\software.genruntimeconfig.cache
 C:\Users\ALONSO\Desktop\software\obj\Debug\net9.0\ref\software.dll
+C:\Users\ALONSO\Desktop\software\obj\Debug\net9.0\compressed\f7sg0dqc8n-lg8dbcw17e.gz
+C:\Users\ALONSO\Desktop\software\obj\Debug\net9.0\compressed\a0bf2o2bmh-ht3tfbugjf.gz
