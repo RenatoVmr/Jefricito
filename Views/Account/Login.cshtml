@@ -45,7 +45,7 @@
             <button type="submit" class="btn btn-primary w-100 btn-lg mb-3">Iniciar Sesión</button>
             
             <div class="text-center">
-                <a asp-action="Register" class="text-decoration-none">¿No tienes una cuenta? Regístrate</a>
+                <a href="#" id="noAccountLink" class="text-decoration-none">¿No tienes una cuenta? </a>
             </div>
         </form>
     </div>
@@ -97,4 +97,16 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        // Mostrar alerta para usuarios que quieran registrarse
+        (function(){
+            var link = document.getElementById('noAccountLink');
+            if (link) {
+                link.addEventListener('click', function(e){
+                    e.preventDefault();
+                    alert('avisar al administrador para hablilitar cuenta');
+                });
+            }
+        })();
+    </script>
 }
